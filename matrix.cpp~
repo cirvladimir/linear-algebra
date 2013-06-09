@@ -5,8 +5,6 @@
 #include <sstream>
 #include <string>
 
-#define PRINT_SIZE 3
-
 using namespace std;
 
 
@@ -214,12 +212,18 @@ void Matrix::rowReduce()
 //finds null vector of row-reduced eschelon-form matrix=
 void findNullVector(double ** mat, int rows, int cols, double * vec)
 {
-	//go through each column
-	//if only one value, put - summ of other rows, else put 1
+	//go through each column, keeping track of current pivot row
+	//if value at row, col is 1, then col is pivot column
+	//	store - summ of all other entries in row into the cell, inc pivot row
+	//else store 1
 	int row = 0;
 	for (int col = 0; col < cols; col++)
 	{
-		if (abs(*(*(mat + row) + col)) > ZERO_THRESH)
+		if (row >= rows)
+		{
+			*vec = 1;
+		}
+		else if (abs(*(*(mat + row) + col) - 1) < ZERO_THRESH)
 		{
 			*vec = 0;
 			//loop through all columns in pivot row, get negative 
@@ -228,18 +232,12 @@ void findNullVector(double ** mat, int rows, int cols, double * vec)
 				*vec -= *(*(mat + row) + chkCol);
 			}
 			row++;
-			if (row >= rows)
-			{
-				for (int i = col + 1; i < cols; i++)
-					*(vec++) = 1;
-				break;
-			}
-			vec++;
 		}
 		else
 		{
-			*(vec++) = 1;
+			*vec = 1;
 		}
+		vec++;
 	}
 }
 
@@ -271,8 +269,8 @@ vector<Eigenpair> Matrix::getEigenpairs()
 		if (i != rows)
 			cout << " + ";
 	}
-	cout << endl;*/
-	//cout << charPol[0] << " + " << charPol[1] << " * X + " << charPol[2] << " * X^2" << endl;
+	cout << endl;
+	//*///cout << charPol[0] << " + " << charPol[1] << " * X + " << charPol[2] << " * X^2" << endl;
 	Polynomial pol(charPol, rows + 1);
 	vector<double> eigVals = pol.getRoots();
 	//cout << eigVals[0] << ", " << eigVals[1] << endl;

@@ -4,16 +4,20 @@
 
 using namespace std;
 
-double Polynomial::binarySearch(double min, double max, bool inc)
+double Polynomial::binarySearch(double min, double max, bool inc, int its)
 {
 	double mid = (min + max) / 2;
+	//cout << "min: (" << min << ", " << getValue(min) << "), max: (" <<
+	//	max << ", " << getValue(max) << ")" << mid<< endl;
 	double val = getValue(mid);
-	if (abs(val) < BIN_PRECISION)
+	if (its > MAX_BIN_ITS)
+		return mid;
+	else if (abs(val) < BIN_PRECISION)
 		return mid;
 	else if ((val > 0) != inc) 
-		return binarySearch(mid, max, inc);
+		return binarySearch(mid, max, inc, its + 1);
 	else
-		return binarySearch(min, mid, inc);
+		return binarySearch(min, mid, inc its + 1);
 }
 
 Polynomial::Polynomial(double * cfs, int numCfs)
@@ -61,7 +65,6 @@ vector<double> Polynomial::getRoots()
 			dxdy[pow - 1] = pow * coefs[pow];
 		} 
 		vector<double> critPts = Polynomial(dxdy, numCoefs - 1).getRoots();
-		
 		double val1 = getValue(critPts.at(0));
 		
 		//check on - end
@@ -72,7 +75,7 @@ vector<double> Polynomial::getRoots()
 			double nextVal = -1;
 			while (getValue(endCrit + nextVal) * val1 > 0)
 				nextVal *= 2;
-			roots.push_back(binarySearch(endCrit + nextVal, endCrit, !incAtNegInf));
+			roots.push_back(binarySearch(endCrit + nextVal, endCrit, !incAtNegInf, 0));
 		}
 		
 		//check between critical points
@@ -81,7 +84,7 @@ vector<double> Polynomial::getRoots()
 			double val2 = getValue(critPts.at(critInd + 1));
 			if (val1 * val2 <= 0)
 			{//points on opposite sides
-				roots.push_back(binarySearch(critPts.at(critInd), critPts.at(critInd + 1), val2 > val1)); 
+				roots.push_back(binarySearch(critPts.at(critInd), critPts.at(critInd + 1), val2 > val1, 0)); 
 			}
 			val1 = val2;
 		}
@@ -94,7 +97,7 @@ vector<double> Polynomial::getRoots()
 			double nextVal = 1;
 			while (getValue(endCrit + nextVal) * val1 > 0)
 				nextVal *= 2;
-			roots.push_back(binarySearch(endCrit, endCrit + nextVal, incAtPlusInf));
+			roots.push_back(binarySearch(endCrit, endCrit + nextVal, incAtPlusInf, 0));
 		}
 	}
 	return roots;

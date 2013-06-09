@@ -1,7 +1,8 @@
 #ifndef Matrix_h
 #define Matrix_h
 
-#define ZERO_THRESH 0.0000000001
+#define ZERO_THRESH 0.00000000001
+#define PRINT_SIZE 17
 
 #include <vector>
 

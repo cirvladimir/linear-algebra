@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstdlib>
 #include "data.h"
+#include "polynomial.h"
 
 #define NUM_POINTS 10
 
@@ -20,12 +21,11 @@ Point::Point(double _x, double _y)
 	y = _y;
 }
 
-
 int main() 
 {
-	int numPts = 2;
-	int numDims = 2;
-	double dimRange[2][2] = {{0, 10}, {0, 1}};
+	int numPts = 40;
+	int numDims = 5;
+	double dimRange[5][2] = {{0, 10}, {0, 1}, {0, 10}, {0, 1}, {0, 1}};
 	double pts[numPts * numDims];
 	for (int i = 0; i < numPts; i++)
 	{
@@ -33,12 +33,13 @@ int main()
 		{
 			double randD = (rand() % 100000) * 1.0 / 100000;
 			pts[i * numDims + j] = (dimRange[j][1] - dimRange[j][0]) * randD + dimRange[j][0];
-			cout << pts[i * numDims + j] << endl;
+			//cout << pts[i * numDims + j] << endl;
 		}
 	}
-	Data dt;
-	vector<Eigenpair> egPrs = dt.getPairs(pts, numPts, numDims);
-  for (int i = 0; i < egPrs.size(); i++)
+	Data dt(numDims);
+	dt.load(pts, numPts);
+	vector<Eigenpair> egPrs = dt.getPairs();
+  /*for (int i = 0; i < egPrs.size(); i++)
   {
 		cout << "eigenvalue: " << egPrs.at(i).value << endl;
 		cout << "eigenvector: ";
@@ -49,8 +50,44 @@ int main()
 				cout << ", ";
 		}
 		cout << endl;
-	}	
-	/*double prepMat[3][3] = { { 4, 6, 0}, {4, 0, 1}, {2, 3, 0} };
+	}*/
+	
+	double avgEig = 0;
+	for (int i = 0; i < egPrs.size(); i++)
+	{
+		avgEig += egPrs.at(i).value / egPrs.size();
+	}
+	
+	dt.compOrthoBasis(avgEig);
+	vector<double *> bs = dt.getOrthoBasis();
+	for (int i = 0; i < bs.size(); i++)
+	{
+		for (int j = 0; j < numDims; j++)
+		{
+			cout << bs.at(i)[j] << ", ";
+		}
+		cout << endl;
+	}
+	
+	double testVec[5] = {6, .5, .5, .5, .5};
+	double * proj = new double[bs.size()];
+	dt.getProjection(testVec, proj);
+	for (int i = 0; i < bs.size(); i++)
+	{
+		cout << proj[i] << ", ";
+	}
+	cout << endl;
+	
+	/*
+	
+	double pl[7] = {1.842880000213704e-10, -0.059413640000000004, 1};
+	Polynomial ps(pl, 3);
+	vector<double> roots = ps.getRoots();
+	for (int i = 0; i < roots.size(); i++)
+		cout << roots.at(i) << ", ";
+	cout << endl;
+	
+	double prepMat[3][3] = { { 4, 6, 0}, {4, 0, 1}, {2, 3, 0} };
 	
 	double * mat[3] = {prepMat[0], prepMat[1], prepMat[2]};
 	

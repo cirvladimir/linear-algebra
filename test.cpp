@@ -20,24 +20,6 @@ Point::Point(double _x, double _y)
 	y = _y;
 }
 
-void printM(double ** mat, int rows, int cols)
-{
-	for (int j = 0; j < rows; j++)
-	{
-		for (int i = 0; i < cols; i++)
-		{
-			cout << *(*(mat + j) + i) << " ";
-		}
-		cout << endl;
-	}
-}
-
-void solveQuad(double a, double b, double c, double * outp)
-{
-	*(outp++) = (-b + sqrt(b * b - 4 * a * c)) / 2 * a;
-	*outp = (-b - sqrt(b * b - 4 * a * c)) / 2 * a;
-}
-
 
 int main() 
 {	
@@ -103,11 +85,20 @@ int main()
     cout << *it << endl;*/
     
   Matrix mat(3, 3);
-  mat.set(2, 2, 2.132);
-  mat.set(2, 1, 21.32);
-  mat.set(2, 0, 213.2);
-  mat.set(1, 1, 2132.13);
-  mat.set(1, 2, 21.2);
-  //cout << mat.get(0, 0) << " " << mat.get(2, 2) << endl;
-  mat.print();
+  mat.set(0, 0, 1);
+  mat.set(0, 1, 2);
+  mat.set(0, 2, 3);
+  mat.set(1, 0, 2);
+  mat.set(1, 1, 3);
+  mat.set(1, 2, 4);
+  mat.set(2, 0, 3);
+  mat.set(2, 1, 4);
+  mat.set(2, 2, 5);
+  vector<Eigenpair> egPrs = mat.getEigenpairs();
+  for (int i = 0; i < egPrs.size(); i++)
+  {
+		cout << "eigenvalue: " << egPrs.at(i).value << endl;
+		cout << "eigenvector: " << egPrs.at(i).vector[0] << ", " <<
+			egPrs.at(i).vector[1] << endl;
+	}
 }

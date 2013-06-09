@@ -20,81 +20,6 @@ Point::Point(double _x, double _y)
 	y = _y;
 }
 
-void printM(double ** mat, int rows, int cols)
-{
-	for (int j = 0; j < rows; j++)
-	{
-		for (int i = 0; i < cols; i++)
-		{
-			cout << *(*(mat + j) + i) << " ";
-		}
-		cout << endl;
-	}
-}
-
-void solveQuad(double a, double b, double c, double * outp)
-{
-	*(outp++) = (-b + sqrt(b * b - 4 * a * c)) / 2 * a;
-	*outp = (-b - sqrt(b * b - 4 * a * c)) / 2 * a;
-}
-//finds null vector of row-reduced eschelon-form matrix=
-void findNullVector(double ** mat, int rows, int cols, double * vec)
-{
-	//go through each column
-	//if only one value, put - summ of other rows, else put 1
-	int row = 0;
-	for (int col = 0; col < cols; col++)
-	{
-		if (abs(*(*(mat + row) + col)) > 0.0000000001)
-		{
-			*vec = 0;
-			//loop through all columns in pivot row, get negative 
-			for (int chkCol = col + 1; chkCol < cols; chkCol++)
-			{
-				*vec -= *(*(mat + row) + chkCol);
-			}
-			row++;
-			if (row >= rows)
-			{
-				for (int i = col + 1; i < cols; i++)
-					*(vec++) = 1;
-				break;
-			}
-			vec++;
-		}
-		else
-		{
-			*(vec++) = 1;
-		}
-	}
-}
-
-void copyMatrix(double m1[2][2], double m2[2][2])
-{
-	for (int i = 0; i < 2; i++)
-	{
-		for (int j = 0; j < 2; j++)
-		{
-			m2[i][j] = m1[i][j];
-		}
-	}
-}
-
-void getEigenvector(double mat[2][2], double val, double * iVec)
-{
-	double matCop[2][2];
-	copyMatrix(mat, matCop);
-	for (int i = 0; i < 2; i++)
-	{
-		matCop[i][i] -= val;
-	}
-	double * sMat[2] = { matCop[0], matCop[1] };
-	rowReduce(sMat, 2, 2);
-	//cout << endl << "-----" << endl;
-	//printM(sMat,2,2);
-	//cout << "-----" << endl;
-	findNullVector(sMat, 2, 2, iVec);
-}
 
 int main() 
 {	
@@ -160,11 +85,20 @@ int main()
     cout << *it << endl;*/
     
   Matrix mat(3, 3);
-  mat.set(2, 2, 2.132);
-  mat.set(2, 1, 21.32);
-  mat.set(2, 0, 213.2);
-  mat.set(1, 1, 2132.13);
-  mat.set(1, 2, 21.2);
-  //cout << mat.get(0, 0) << " " << mat.get(2, 2) << endl;
-  mat.print();
+  mat.set(0, 0, 1);
+  mat.set(0, 1, 2);
+  mat.set(0, 2, 3);
+  mat.set(1, 0, 2);
+  mat.set(1, 1, 3);
+  mat.set(1, 2, 4);
+  mat.set(2, 0, 3);
+  mat.set(2, 1, 4);
+  mat.set(2, 2, 5);
+  vector<Eigenpair> egPrs = mat.getEigenpairs();
+  for (int i = 0; i < egPrs.size(); i++)
+  {
+		cout << "eigenvalue: " << egPrs.at(i).value << endl;
+		cout << "eigenvector: " << egPrs.at(i).vector[0] << ", " <<
+			egPrs.at(i).vector[1] << endl;
+	}
 }

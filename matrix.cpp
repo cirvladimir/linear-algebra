@@ -1,4 +1,5 @@
 #include "matrix.h"
+#include "polynomial.h"
 #include <iostream>
 #include <cmath>
 #include <sstream>
@@ -64,21 +65,13 @@ void multRow (double ** mat, double a, int cols)
 	}
 }
 
-Matrix Matrix::copy()
+Eigenpair::Eigenpair(double val, double * vec)
 {
-	Matrix cop();
-	cop.rows = rows;
-	cop.cols = cols;
-	cop.mat = new double * [rows];
-	for (int row = 0; row < rows; row++)
-	{
-		cop.mat[row] = new double[cols];
-		for (int col = 0; col < cols; col++)
-		{
-			cop.mat[row][col] = mat[row][col];
-		}
-	}
+	value = val;
+	vector = vec;
 }
+
+Matrix::Matrix() {}
 
 Matrix::Matrix(int rs, int cls)
 {
@@ -96,6 +89,23 @@ Matrix::Matrix(int rs, int cls)
 	}
 }
 
+Matrix Matrix::copy()
+{
+	Matrix cop;
+	cop.rows = rows;
+	cop.cols = cols;
+	cop.mat = new double * [rows];
+	for (int row = 0; row < rows; row++)
+	{
+		cop.mat[row] = new double[cols];
+		for (int col = 0; col < cols; col++)
+		{
+			cop.mat[row][col] = mat[row][col];
+		}
+	}
+	return cop;
+}
+
 void Matrix::set(int r, int c, double val)
 {
 	mat[r][c] = val;
@@ -106,6 +116,11 @@ double Matrix::get(int r, int c)
 	return mat[r][c];
 }
 
+void Matrix::add(int r, int c, double val)
+{
+	mat[r][c] += val;
+}
+
 void Matrix::print()
 {
 	cout << "------" << endl;
@@ -114,7 +129,7 @@ void Matrix::print()
 		for (int c = 0; c < cols; c++)
 		{
 			stringstream strStr;
-			strStr << mat[r][c];
+			strStr << round(pow(10, PRINT_SIZE + 2) * mat[r][c]) / pow(10, PRINT_SIZE + 2);
 			string str = strStr.str();
 			if (str.size() > PRINT_SIZE) {
 				str = str.substr(0, PRINT_SIZE);
@@ -132,16 +147,37 @@ void Matrix::print()
 	cout << "------" << endl;
 }
 
-void Matrix::getCharPol(int rowNum, vector<int> cols, double * pol)
+void Matrix::getCharPol(int rowNum, vector<int> exCols, double * pol)
 {
 	if (rowNum == rows - 1)
 	{
-		pol[0] += mat[rowNum][cols.at(0)];
-		pol[1] += -1;
+		pol[0] += mat[rowNum][exCols.at(0)];
+		if (rowNum == exCols.at(0))
+			pol[1] += -1;
 	}
 	else
 	{
-		for 
+		int pmMult = 1;
+		for (int colInd = 0; colInd < exCols.size(); colInd++)
+		{
+			int col = exCols.at(colInd);
+			exCols.erase(exCols.begin() + colInd);
+			double * locPol =  new double[rows + 1];
+			for (int i = 0; i < rows + 1; i++)
+			{
+				locPol[i] = 0;
+			}
+			getCharPol(rowNum + 1, exCols, locPol);
+			//write locPol to answer
+			for (int i = 0; i < rows + 1; i++)
+			{
+				pol[i] += locPol[i] * mat[rowNum][col] * pmMult;
+				if ((col == rowNum) && (i != 0))
+					pol[i] -= locPol[i - 1];
+			}
+			exCols.insert(exCols.begin() + colInd, col);
+			pmMult *= -1;
+		}
 	}
 }
 
@@ -207,35 +243,38 @@ void findNullVector(double ** mat, int rows, int cols, double * vec)
 	}
 }
 
-void copyMatrix(double m1[2][2], double m2[2][2])
+void Matrix::getEigenvector(double val, double * iVec)
 {
-	for (int i = 0; i < 2; i++)
+	Matrix copMat = copy();
+	for (int i = 0; i < rows; i++)
 	{
-		for (int j = 0; j < 2; j++)
-		{
-			m2[i][j] = m1[i][j];
-		}
+		copMat.add(i, i, -val);
 	}
-}
-
-void getEigenvector(double mat[2][2], double val, double * iVec)
-{
-	double matCop[2][2];
-	copyMatrix(mat, matCop);
-	for (int i = 0; i < 2; i++)
-	{
-		matCop[i][i] -= val;
-	}
-	double * sMat[2] = { matCop[0], matCop[1] };
-	rowReduce(sMat, 2, 2);
-	//cout << endl << "-----" << endl;
-	//printM(sMat,2,2);
-	//cout << "-----" << endl;
-	findNullVector(sMat, 2, 2, iVec);
+	copMat.rowReduce();
+	findNullVector(copMat.mat, rows, cols, iVec);
 }
 
 vector<Eigenpair> Matrix::getEigenpairs()
 {
 	//assume rows = cols
+	double * charPol = new double[rows + 1];
+	vector<int> exCols;
+	for (int i = 0; i < cols; i++)
+	{
+		exCols.push_back(i);
+	}
+	getCharPol(0, exCols, charPol);
+	//cout << charPol[0] << " + " << charPol[1] << " * X + " << charPol[2] << " * X^2" << endl;
+	Polynomial pol(charPol, rows + 1);
+	vector<double> eigVals = pol.getRoots();
+	//cout << eigVals[0] << ", " << eigVals[1] << endl;
+	vector<Eigenpair> egPrs;
+	for (int i = 0; i < eigVals.size(); i++)
+	{
+		double * eigVec = new double[rows];
+		getEigenvector(eigVals.at(i), eigVec);
+		egPrs.push_back(Eigenpair(eigVals.at(i), eigVec));
+	}
+	return egPrs;
 }
 

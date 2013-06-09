@@ -1,6 +1,8 @@
 #ifndef Matrix_h
 #define Matrix_h
 
+#define ZERO_THRESH 0.0000000001
+
 #include <vector>
 
 using namespace std;

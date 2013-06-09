@@ -173,7 +173,7 @@ void Matrix::getCharPol(int rowNum, vector<int> exCols, double * pol)
 			{
 				pol[i] += locPol[i] * mat[rowNum][col] * pmMult;
 				if ((col == rowNum) && (i != 0))
-					pol[i] -= locPol[i - 1];
+					pol[i] -= locPol[i - 1] * pmMult;
 			}
 			exCols.insert(exCols.begin() + colInd, col);
 			pmMult *= -1;
@@ -219,7 +219,7 @@ void findNullVector(double ** mat, int rows, int cols, double * vec)
 	int row = 0;
 	for (int col = 0; col < cols; col++)
 	{
-		if (abs(*(*(mat + row) + col)) > 0.0000000001)
+		if (abs(*(*(mat + row) + col)) > ZERO_THRESH)
 		{
 			*vec = 0;
 			//loop through all columns in pivot row, get negative 
@@ -251,7 +251,7 @@ void Matrix::getEigenvector(double val, double * iVec)
 		copMat.add(i, i, -val);
 	}
 	copMat.rowReduce();
-	findNullVector(mat, rows, cols, iVec);
+	findNullVector(copMat.mat, rows, cols, iVec);
 }
 
 vector<Eigenpair> Matrix::getEigenpairs()
@@ -264,6 +264,14 @@ vector<Eigenpair> Matrix::getEigenpairs()
 		exCols.push_back(i);
 	}
 	getCharPol(0, exCols, charPol);
+	cout << "Characteristic polynomial: ";
+	for (int i = 0; i < rows + 1; i++)
+	{
+		cout << charPol[i] << " * X ^ " << i;
+		if (i != rows)
+			cout << " + ";
+	}
+	cout << endl;
 	//cout << charPol[0] << " + " << charPol[1] << " * X + " << charPol[2] << " * X^2" << endl;
 	Polynomial pol(charPol, rows + 1);
 	vector<double> eigVals = pol.getRoots();

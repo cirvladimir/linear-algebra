@@ -1,0 +1,6 @@
+#include "polynomial.h"
+
+double * Polynomial::getRoots(double * coefs, int numCoefs)
+{
+	
+}

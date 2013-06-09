@@ -264,14 +264,14 @@ vector<Eigenpair> Matrix::getEigenpairs()
 		exCols.push_back(i);
 	}
 	getCharPol(0, exCols, charPol);
-	cout << "Characteristic polynomial: ";
+	/*cout << "Characteristic polynomial: ";
 	for (int i = 0; i < rows + 1; i++)
 	{
 		cout << charPol[i] << " * X ^ " << i;
 		if (i != rows)
 			cout << " + ";
 	}
-	cout << endl;
+	cout << endl;*/
 	//cout << charPol[0] << " + " << charPol[1] << " * X + " << charPol[2] << " * X^2" << endl;
 	Polynomial pol(charPol, rows + 1);
 	vector<double> eigVals = pol.getRoots();

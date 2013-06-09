@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cmath>
-#include "polynomial.h"
-#include "matrix.h"
+#include <cstdlib>
+#include "data.h"
 
 #define NUM_POINTS 10
 
@@ -22,7 +22,34 @@ Point::Point(double _x, double _y)
 
 
 int main() 
-{	
+{
+	int numPts = 2;
+	int numDims = 2;
+	double dimRange[2][2] = {{0, 10}, {0, 1}};
+	double pts[numPts * numDims];
+	for (int i = 0; i < numPts; i++)
+	{
+		for (int j = 0; j < numDims; j++)
+		{
+			double randD = (rand() % 100000) * 1.0 / 100000;
+			pts[i * numDims + j] = (dimRange[j][1] - dimRange[j][0]) * randD + dimRange[j][0];
+			//cout << pts[i * numDims + j] << endl;
+		}
+	}
+	Data dt;
+	vector<Eigenpair> egPrs = dt.getPairs(pts, numPts, numDims);
+  for (int i = 0; i < egPrs.size(); i++)
+  {
+		cout << "eigenvalue: " << egPrs.at(i).value << endl;
+		cout << "eigenvector: ";
+		for (int j = 0; j < numDims; j++)
+		{
+			cout << egPrs.at(i).vector[j];
+			if (j != numDims - 1) 
+				cout << ", ";
+		}
+		cout << endl;
+	}	
 	/*double prepMat[3][3] = { { 4, 6, 0}, {4, 0, 1}, {2, 3, 0} };
 	
 	double * mat[3] = {prepMat[0], prepMat[1], prepMat[2]};
@@ -84,7 +111,7 @@ int main()
 	for (vector<double>::iterator it = roots.begin(); it != roots.end(); ++it)
     cout << *it << endl;*/
     
-  Matrix mat(3, 3);
+  /*Matrix mat(3, 3);
   mat.set(0, 0, 1);
   mat.set(0, 1, 2);
   mat.set(0, 2, 3);
@@ -100,5 +127,6 @@ int main()
 		cout << "eigenvalue: " << egPrs.at(i).value << endl;
 		cout << "eigenvector: " << egPrs.at(i).vector[0] << ", " <<
 			egPrs.at(i).vector[1] << endl;
-	}
+	}*/
+	
 }

@@ -162,7 +162,7 @@ void Matrix::getCharPol(int rowNum, vector<int> exCols, double * pol)
 		for (int colInd = 0; colInd < exCols.size(); colInd++)
 		{
 			int col = exCols.at(colInd);
-			if (mat[rowNum][col] != 0)
+			if ((mat[rowNum][col] != 0) || (col == rowNum))
 			{
 				exCols.erase(exCols.begin() + colInd);
 				double * locPol =  new double[rows + 1];
@@ -207,9 +207,13 @@ void Matrix::rowReduce()
 	//finish row-reduced eschelon
 	while (curRow >= 0)
 	{
-		while ((nextCol > 0) && (*(*mat + nextCol) == 0))
-			nextCol--;
+		nextCol = 0;
+		while (*(*(mat + curRow) + nextCol) == 0)
+			nextCol++;
+		//print();
+		//cout << "a "<< nextCol << " " << curRow  << endl;
 		multRow(mat + curRow, 1 / *(*(mat + curRow) + nextCol), cols);
+		//print();
 		reduceDir(mat + curRow, -1, curRow, nextCol, cols);
 		curRow--;
 	}
@@ -255,6 +259,7 @@ void Matrix::getEigenvector(double val, double * iVec)
 		copMat.add(i, i, -val);
 	}
 	copMat.rowReduce();
+	//copMat.print();
 	findNullVector(copMat.mat, rows, cols, iVec);
 }
 
@@ -262,11 +267,16 @@ vector<Eigenpair> Matrix::getEigenpairs()
 {
 	//assume rows = cols
 	double * charPol = new double[rows + 1];
+	for (int i = 0; i < rows + 1; i++)
+	{
+		charPol[i] = 0;
+	}
 	vector<int> exCols;
 	for (int i = 0; i < cols; i++)
 	{
 		exCols.push_back(i);
 	}
+	//print();
 	getCharPol(0, exCols, charPol);
 	/*cout << "Characteristic polynomial: ";
 	for (int i = 0; i < rows + 1; i++)
@@ -284,7 +294,7 @@ vector<Eigenpair> Matrix::getEigenpairs()
 	for (int i = 0; i < eigVals.size(); i++)
 	{
 		double * eigVec = new double[rows];
-		getEigenvector(eigVals.at(i), eigVec);
+		getEigenvector(eigVals.at(i) > .00000000000001 ? eigVals.at(i) : 0, eigVec);
 		egPrs.push_back(Eigenpair(eigVals.at(i), eigVec));
 	}
 	return egPrs;

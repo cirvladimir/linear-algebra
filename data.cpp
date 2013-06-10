@@ -58,7 +58,7 @@ void Data::load(double * points, int numPts)
 	//covM.set(0, 0, 0.0575962);        covM.set(0, 1,  0.0102312  );       
 	//covM.set(1, 0, 0.0102312   );  covM.set(1, 1,    0.00181744);
 	
-	covM.print();
+	//covM.print();
 	
 	//return eigen pairs for covariance matrix
 	egPrs = covM.getEigenpairs();

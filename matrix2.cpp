@@ -5,8 +5,9 @@
 #include <sstream>
 #include <string>
 
-using namespace std;
+#define _USE_MATH_DEFINES
 
+using namespace std;
 
 void moveDownZeros(double ** mat, int maxRows, int colNum, int maxCols)
 {
@@ -62,6 +63,7 @@ void multRow (double ** mat, double a, int cols)
 		*(*mat + i) *= a;
 	}
 }
+
 
 Eigenpair::Eigenpair(double val, double * vec)
 {
@@ -145,40 +147,6 @@ void Matrix::print()
 	cout << "------" << endl;
 }
 
-void Matrix::getCharPol(int rowNum, vector<int> exCols, double * pol)
-{
-	if (rowNum == rows - 1)
-	{
-		pol[0] += mat[rowNum][exCols.at(0)];
-		if (rowNum == exCols.at(0))
-			pol[1] += -1;
-	}
-	else
-	{
-		int pmMult = 1;
-		for (int colInd = 0; colInd < exCols.size(); colInd++)
-		{
-			int col = exCols.at(colInd);
-			exCols.erase(exCols.begin() + colInd);
-			double * locPol =  new double[rows + 1];
-			for (int i = 0; i < rows + 1; i++)
-			{
-				locPol[i] = 0;
-			}
-			getCharPol(rowNum + 1, exCols, locPol);
-			//write locPol to answer
-			for (int i = 0; i < rows + 1; i++)
-			{
-				pol[i] += locPol[i] * mat[rowNum][col] * pmMult;
-				if ((col == rowNum) && (i != 0))
-					pol[i] -= locPol[i - 1] * pmMult;
-			}
-			exCols.insert(exCols.begin() + colInd, col);
-			pmMult *= -1;
-		}
-	}
-}
-
 void Matrix::rowReduce()
 {
 	int minDim = min(rows, cols);
@@ -208,6 +176,7 @@ void Matrix::rowReduce()
 		curRow--;
 	}
 }
+
 
 //finds null vector of row-reduced eschelon-form matrix=
 void findNullVector(double ** mat, int rows, int cols, double * vec)
@@ -241,6 +210,14 @@ void findNullVector(double ** mat, int rows, int cols, double * vec)
 	}
 }
 
+void printArrr(double * ar, int dim)
+{
+	for (int i = 0; i <dim; i++)
+	{
+		cout << ar[i] << ", ";
+	}
+	cout << endl;
+}
 void Matrix::getEigenvector(double val, double * iVec)
 {
 	Matrix copMat = copy();
@@ -254,34 +231,47 @@ void Matrix::getEigenvector(double val, double * iVec)
 
 vector<Eigenpair> Matrix::getEigenpairs()
 {
-	//assume rows = cols
-	double * charPol = new double[rows + 1];
-	vector<int> exCols;
-	for (int i = 0; i < cols; i++)
+	Matrix copMat = copy();
+	for (int i = 0; i < rows; i++)
 	{
-		exCols.push_back(i);
+		for (int j = i + 1; j < rows; j++)
+		{
+			double th;
+			if (copMat.mat[i][i] == copMat.mat[j][j])
+				th = M_PI / 4;
+			else
+				th = 0.5 * atan(2 * copMat.mat[i][j] / (copMat.mat[j][j] - copMat.mat[i][i]));
+			double c = cos(th);
+			double s = sin(th);
+			double sii = copMat.mat[i][i];
+			double sjj = copMat.mat[j][j];
+			double sij = copMat.mat[i][j];
+			copMat.mat[i][i] = c * c * sii - 2 * s * c * sij + s * s * sjj;
+			copMat.mat[j][j] = c * c * sii + 2 * s * c * sij + s * s * sjj;
+			copMat.mat[i][j] = 0;
+			copMat.mat[j][i] = copMat.mat[i][j];
+			for (int k = i + 1; k < cols; k++)
+			{
+				if ((k != i) && (k != j))
+				{
+					double sik = copMat.mat[i][k];
+					double sjk = copMat.mat[j][k];
+					copMat.mat[i][k] = c * sik - s * sjk;
+					copMat.mat[k][i] = copMat.mat[i][k];
+					copMat.mat[j][k] = s * sik + c * sjk;
+					copMat.mat[k][j] = copMat.mat[j][k];
+				}
+			}
+		}
 	}
-	getCharPol(0, exCols, charPol);
-	/*cout << "Characteristic polynomial: ";
-	for (int i = 0; i < rows + 1; i++)
+	vector<Eigenpair> prs;
+	for (int i = 0; i < rows; i++)
 	{
-		cout << charPol[i] << " * X ^ " << i;
-		if (i != rows)
-			cout << " + ";
-	}
-	cout << endl;
-	//*///cout << charPol[0] << " + " << charPol[1] << " * X + " << charPol[2] << " * X^2" << endl;
-	Polynomial pol(charPol, rows + 1);
-	vector<double> eigVals = pol.getRoots();
-	//cout << eigVals[0] << ", " << eigVals[1] << endl;
-	vector<Eigenpair> egPrs;
-	for (int i = 0; i < eigVals.size(); i++)
-	{
+		double eigVal = copMat.mat[i][i];
 		double * eigVec = new double[rows];
-		getEigenvector(eigVals.at(i), eigVec);
-		egPrs.push_back(Eigenpair(eigVals.at(i), eigVec));
+		getEigenvector(eigVal, eigVec);
+		prs.push_back(Eigenpair(eigVal, eigVec));
 	}
-	return egPrs;
+	return prs;	
 }
-
 

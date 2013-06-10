@@ -5,6 +5,8 @@
 #include <sstream>
 #include <string>
 
+#define _USE_MATH_DEFINES
+
 using namespace std;
 
 
@@ -145,6 +147,7 @@ void Matrix::print()
 	cout << "------" << endl;
 }
 
+
 void Matrix::getCharPol(int rowNum, vector<int> exCols, double * pol)
 {
 	if (rowNum == rows - 1)
@@ -159,22 +162,25 @@ void Matrix::getCharPol(int rowNum, vector<int> exCols, double * pol)
 		for (int colInd = 0; colInd < exCols.size(); colInd++)
 		{
 			int col = exCols.at(colInd);
-			exCols.erase(exCols.begin() + colInd);
-			double * locPol =  new double[rows + 1];
-			for (int i = 0; i < rows + 1; i++)
+			if (mat[rowNum][col] != 0)
 			{
-				locPol[i] = 0;
+				exCols.erase(exCols.begin() + colInd);
+				double * locPol =  new double[rows + 1];
+				for (int i = 0; i < rows + 1; i++)
+				{
+					locPol[i] = 0;
+				}
+				getCharPol(rowNum + 1, exCols, locPol);
+				//write locPol to answer
+				for (int i = 0; i < rows + 1; i++)
+				{
+					pol[i] += locPol[i] * mat[rowNum][col] * pmMult;
+					if ((col == rowNum) && (i != 0))
+						pol[i] -= locPol[i - 1] * pmMult;
+				}
+				exCols.insert(exCols.begin() + colInd, col);
+				pmMult *= -1;
 			}
-			getCharPol(rowNum + 1, exCols, locPol);
-			//write locPol to answer
-			for (int i = 0; i < rows + 1; i++)
-			{
-				pol[i] += locPol[i] * mat[rowNum][col] * pmMult;
-				if ((col == rowNum) && (i != 0))
-					pol[i] -= locPol[i - 1] * pmMult;
-			}
-			exCols.insert(exCols.begin() + colInd, col);
-			pmMult *= -1;
 		}
 	}
 }

@@ -13,6 +13,14 @@ vector<Eigenpair> Data::getPairs()
 {
 	return egPrs;
 }
+void printAr(double * ar, int dim)
+{
+	for (int i = 0; i <dim; i++)
+	{
+		cout << ar[i] << ", ";
+	}
+	cout << endl;
+}
 
 void Data::load(double * points, int numPts)
 {
@@ -28,6 +36,7 @@ void Data::load(double * points, int numPts)
 			avgVec[dmInd] += *(points + ptInd * dim + dmInd) / numPts;
 		}
 	}
+	//printAr(avgVec, dim);
 		
 	//compute covariance matrix
 	Matrix covM(dim, dim);
@@ -49,7 +58,7 @@ void Data::load(double * points, int numPts)
 	//covM.set(0, 0, 0.0575962);        covM.set(0, 1,  0.0102312  );       
 	//covM.set(1, 0, 0.0102312   );  covM.set(1, 1,    0.00181744);
 	
-	//covM.print();
+	covM.print();
 	
 	//return eigen pairs for covariance matrix
 	egPrs = covM.getEigenpairs();
@@ -70,6 +79,15 @@ double dot(double * v1, double * v2, int dim)
 	return ret;
 }
 
+void normVect(double * v, int dim, double * outp)
+{
+	double len = sqrt(dot(v, v, dim));
+	for (int i = 0; i < dim; i++)
+	{
+		outp[i] = v[i] / len;
+	}
+}
+
 void Data::compOrthoBasis(double minIVal)
 {
 	basis.empty();
@@ -77,12 +95,9 @@ void Data::compOrthoBasis(double minIVal)
 	{
 		if (egPrs.at(i).value >= minIVal)
 		{
-			double len = sqrt(dot(egPrs.at(i).vector, egPrs.at(i).vector, dim));
 			double * bs = new double[dim];
-			for (int j = 0; j < dim; j++)
-			{
-				bs[j] = egPrs.at(i).vector[j] / len;
-			}
+			normVect(egPrs.at(i).vector, dim, bs);
+			//printAr(bs, dim);
 			basis.push_back(bs);
 		}
 	}
@@ -98,9 +113,25 @@ double getDist(double * v1, double * v2, int dim)
 	return sqrt(dot(diff, diff, dim));
 }
 
-int Data::match(vector<double *>vecs, double * v)
+double getAng(double * v1, double * v2, int dim)
 {
-	if (vecs.size() == 0)
+	double * origin = new double[dim];
+	for (int i = 0; i < dim; i++)
+	{
+		origin[i] = 0;
+	}
+	double v1Norm[dim];
+	double v2Norm[dim];
+	normVect(v1, dim, v1Norm);
+	normVect(v2, dim, v2Norm);
+	double cosine = dot(v1Norm, v2Norm, dim);
+	return abs(cosine - 1);
+}
+
+
+int Data::match(double ** vecs, int numVs, double * v)
+{
+	if (numVs == 0)
 	{
 		return -1;
 	}
@@ -109,13 +140,15 @@ int Data::match(vector<double *>vecs, double * v)
 		double vProj[basis.size()];
 		getProjection(v, vProj);
 		double tProj[basis.size()];
-		getProjection(vecs.at(0), tProj);
-		double minDist = getDist(vProj, tProj, basis.size());
+		getProjection(vecs[1], tProj);
+		//printAr(vProj, basis.size());
+		//printAr(tProj, basis.size());
+		double minDist = getAng(vProj, tProj, basis.size());//getDist(vProj, tProj, basis.size());
 		int minInd = 0;
-		for (int i = 1; i < vecs.size(); i++)
+		for (int i = 1; i < numVs; i++)
 		{
-			getProjection(vecs.at(i), tProj);
-			double curDist = getDist(vProj, tProj, basis.size());
+			getProjection(vecs[i], tProj);
+			double curDist = getAng(vProj, tProj, basis.size());//getDist(vProj, tProj, basis.size());
 			if (curDist < minDist)
 			{
 				minDist = curDist;

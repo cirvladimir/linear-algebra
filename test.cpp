@@ -5,6 +5,7 @@
 #include "polynomial.h"
 
 #define NUM_POINTS 10
+#define _USE_MATH_DEFINES
 
 using namespace std;
 
@@ -21,8 +22,46 @@ Point::Point(double _x, double _y)
 	y = _y;
 }
 
+void printArr(double * ar, int dim)
+{
+	for (int i = 0; i <dim; i++)
+	{
+		cout << ar[i] << ", ";
+	}
+	cout << endl;
+}
+
+
 int main() 
 {
+	int w = 3;
+	int h = 3;
+	Matrix m(w, h);
+	for (int i = 0; i < w; i ++)
+	{
+		for (int j = i; j < h; j++)
+		{
+			double nextV = rand() % 100 + 1;
+			m.set(i, j, nextV);
+			m.set(j, i, nextV);
+		}
+	}
+	
+	m.print();
+	//m.multByRot(1, 2, 0.7144496363095);
+	//m.simpMat(1, 2);
+	//m.print();
+	cout << "working" << endl;
+	vector<Eigenpair> prs = m.getEigenpairs();
+	for (int i = 0; i < prs.size(); i++)
+	{
+		cout << "value: " << prs.at(i).value;
+		cout << " vector: ";
+		printArr(prs.at(i).vector, 2);
+	}
+	cout << "done" << endl;
+	
+	/*
 	int numPts = 40;
 	int numDims = 5;
 	double dimRange[5][2] = {{0, 10}, {0, 1}, {0, 10}, {0, 1}, {0, 1}};
@@ -39,7 +78,7 @@ int main()
 	Data dt(numDims);
 	dt.load(pts, numPts);
 	vector<Eigenpair> egPrs = dt.getPairs();
-  /*for (int i = 0; i < egPrs.size(); i++)
+  for (int i = 0; i < egPrs.size(); i++)
   {
 		cout << "eigenvalue: " << egPrs.at(i).value << endl;
 		cout << "eigenvector: ";
@@ -50,7 +89,7 @@ int main()
 				cout << ", ";
 		}
 		cout << endl;
-	}*/
+	}
 	
 	double avgEig = 0;
 	for (int i = 0; i < egPrs.size(); i++)
@@ -69,14 +108,26 @@ int main()
 		cout << endl;
 	}
 	
-	double testVec[5] = {6, .5, .5, .5, .5};
-	/*double * proj = new double[bs.size()];
+	double sampVecs[4][5] = { 
+		{ 10, 20, 10, 10, 10},
+		{7, .5, .5, -4, .5},
+		{20, 20, -20, 20, 20},
+		{-10, 2, 2, 3, 41}};
+		
+	double * sV[4] = { sampVecs[0], sampVecs[1], sampVecs[2], sampVecs[3] };
+	
+	double testVec[5] = {5.69204, 0.488711, 6.36872, 0.518744, 0.579536};
+	
+	//int bestM = dt.match(sV, 4, testVec);
+	//cout << "best match " << bestM << endl;
+	
+	double * proj = new double[bs.size()];
 	dt.getProjection(testVec, proj);
 	for (int i = 0; i < bs.size(); i++)
 	{
 		cout << proj[i] << ", ";
 	}
-	cout << endl;*
+	cout << endl;
 	
 	/*
 	

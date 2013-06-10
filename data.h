@@ -21,7 +21,7 @@ class Data
 		void compOrthoBasis(double minIVal);
 		vector<double *> getOrthoBasis();
 		void getProjection(double * vec, double * proj);
-		int match(vector<double *>vecs, double * v);
+		int match(double ** vecs, int numVs, double * v);
 };
 
 #endif
